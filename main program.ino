@@ -1,12 +1,9 @@
-/*
-  RGB Color Sensor Demonstration
-  rgb-color-sensor-demo.ino
-  Read RGB values from Color Sensor
-  Must use calibration values from Color Sensor Calibration Sketch
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h> 
 
-  DroneBot Workshop 2020
-  https://dronebotworkshop.com
-*/
+// Define the I2C address of the LCD. Common values are 0x27 and 0x3F.
+// Change it if yours is different.
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // Define color sensor pins
 
@@ -38,8 +35,7 @@ int redValue;
 int greenValue;
 int blueValue;
 
-
-
+// Variable for the Min sensing value
 int minsensingvalue = 100;
 void setup() {
 
@@ -55,41 +51,60 @@ void setup() {
   // Set Frequency scaling to 20%
   digitalWrite(S0,HIGH);
   digitalWrite(S1,LOW);
+
+  // Initialize the LCD connected to the I2C interface
+  lcd.init();
+  // Turn on the backlight
+  lcd.backlight();
   
   // Setup Serial Monitor
   Serial.begin(9600);
 }
 
 void loop() {
+  // Clear the LCD display
+  lcd.clear();
+  
+  // Set the cursor to column 0, line 0
+  lcd.setCursor(0, 0);
   
   // Read Red value
   redPW = getRedPW();
+  
   // Map to value from 0-255
   redValue = map(redPW, redMin, redMax, 255, 0);
+  
   // Delay to stabilize sensor
   delay(200);
   
   // Read Green value
   greenPW = getGreenPW();
+  
   // Map to value from 0-255
   greenValue = map(greenPW, greenMin, greenMax, 255, 0);
+  
   // Delay to stabilize sensor
   delay(200);
   
   // Read Blue value
   bluePW = getBluePW();
+  
   // Map to value from 0-255
   blueValue = map(bluePW, blueMin, blueMax, 255, 0);
+  
   // Delay to stabilize sensor
   delay(200);
   
   // Comparisons to determine the dominant color
   if(redValue > greenValue && redValue > blueValue && redValue >= minsensingvalue) {
     Serial.println("Red");
+    lcd.print("Red");
   } else if(greenValue > redValue && greenValue > blueValue && greenValue >= minsensingvalue) {
     Serial.println("Green");
+    lcd.print("Green");
   } else if(blueValue > redValue && blueValue > greenValue && blueValue >= minsensingvalue) {
     Serial.println("Blue");
+    lcd.print("Blue");
   } else if(redValue < minsensingvalue && greenValue < minsensingvalue && blueValue < minsensingvalue) {
     // If all values are below 130, do nothing (no Serial print)
   } else {
